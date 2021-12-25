@@ -26,6 +26,8 @@ class PlayState extends FlxState
 		player = new Player();
 		map.loadEntities(placeEntities, "entities");
 		add(player);
+
+		FlxG.camera.follow(player, TOPDOWN, 1);
 	}
 
 	function placeEntities(entity:EntityData) {
