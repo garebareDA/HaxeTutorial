@@ -1,5 +1,7 @@
 package;
 
+import flixel.FlxG;
+import flixel.util.FlxSave;
 import flixel.FlxGame;
 import openfl.display.Sprite;
 
