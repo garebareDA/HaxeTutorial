@@ -31,6 +31,9 @@ class MenuState extends FlxState
 		optionsButton.x = (FlxG.width / 2) + 10;
 		optionsButton.y = FlxG.height - optionsButton.height - 10;
 		add(optionsButton);
+
+		playButton.onUp.sound = FlxG.sound.load(AssetPaths.select__wav);
+		
 	}
 
 	private function clickPlay()

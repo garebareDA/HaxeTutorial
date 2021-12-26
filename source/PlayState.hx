@@ -1,5 +1,6 @@
 package;
 
+import flixel.system.FlxSound;
 import flixel.util.FlxColor;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import haxe.Log;
@@ -30,9 +31,13 @@ class PlayState extends FlxState
 	var ending:Bool;
 	var won:Bool;
 
+	var coinSound:FlxSound;
+
 	override public function create()
 	{
 		super.create();
+		coinSound = FlxG.sound.load(AssetPaths.coin__wav);
+
 		map = new FlxOgmo3Loader(AssetPaths.turnBasedRPG__ogmo, AssetPaths.room_01__json);
 		walls = map.loadTilemap(AssetPaths.tiles__png, "walls");
 		walls.setTileProperties(1, NONE);
@@ -142,6 +147,7 @@ class PlayState extends FlxState
 
 	function playerTouchCoin(player:Player, coin:Coin)
 	{
+		coinSound.play(true);
 		if (player.alive && player.exists && coin.alive && coin.exists)
 		{
 			money++;

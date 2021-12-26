@@ -1,5 +1,6 @@
 package;
 
+import flixel.system.FlxSound;
 import lime.utils.Log;
 import flixel.FlxSprite;
 import flixel.FlxG;
@@ -8,10 +9,12 @@ import flixel.math.FlxPoint;
 class Player extends FlxSprite
 {
 	static inline var SPEED:Float = 200;
+	var stepSound:FlxSound;
 
 	public function new(x:Float = 0, y:Float = 0)
 	{
 		super(x, y);
+		stepSound = FlxG.sound.load(AssetPaths.step__wav);
 		loadGraphic(AssetPaths.player__png, true, 16, 16);
 		drag.x = drag.y = 1600;
 		setSize(8, 8);
@@ -78,6 +81,7 @@ class Player extends FlxSprite
 
 		if((velocity.x != 0) || (velocity.y != 0))
 		{
+			stepSound.play();
 			switch (facing)
 			{
 				case LEFT, RIGHT:

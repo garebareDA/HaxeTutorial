@@ -1,5 +1,6 @@
 package;
 
+import flixel.system.FlxSound;
 import flixel.math.FlxVelocity;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
@@ -26,10 +27,14 @@ class Enemy extends FlxSprite
 	public var seesPlayer:Bool;
 	public var playerPostion:FlxPoint;
 
+	var stepSound:FlxSound;
+
 	public function new(x:Float, y:Float, type:EnemyType)
 	{
 		super(x, y);
 		this.type = type;
+		stepSound = FlxG.sound.load(AssetPaths.step__wav, 0.4);
+		stepSound.proximity(x, y, FlxG.camera.target, FlxG.width * 0.6);
 		var graphic = if (type == BOSS) AssetPaths.boss__png else AssetPaths.enemy__png;
 		loadGraphic(graphic, true, 16, 16);
 		setFacingFlip(LEFT, false, false);
@@ -52,6 +57,8 @@ class Enemy extends FlxSprite
 		if (this.isFlickering()) return;
 		if ((velocity.x != 0 || velocity.y != 0) && touching == NONE)
 		{
+			stepSound.setPosition(x + frameWidth / 2, y + height);
+			stepSound.play();
 			if (Math.abs(velocity.x) > Math.abs(velocity.y))
 			{
 				if (velocity.x < 0)
