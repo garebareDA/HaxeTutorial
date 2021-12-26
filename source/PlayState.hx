@@ -8,6 +8,8 @@ import flixel.addons.editors.ogmo.FlxOgmo3Loader;
 import flixel.text.FlxText;
 import flixel.FlxState;
 
+using flixel.util.FlxSpriteUtil;
+
 class PlayState extends FlxState
 {
 	var player:Player;
@@ -15,6 +17,14 @@ class PlayState extends FlxState
 	var walls:FlxTilemap;
 
 	var coins:FlxTypedGroup<Coin>;
+	var enemies:FlxTypedGroup<Enemy>;
+
+	var hud:HUD;
+	var money:Int = 0;
+	var health:Int = 3;
+
+	var inCombat:Bool = false;
+	var combatHud:CombatHUD;
 
 	override public function create()
 	{
@@ -28,33 +38,110 @@ class PlayState extends FlxState
 		coins = new FlxTypedGroup();
 		add(coins);
 
+		enemies = new FlxTypedGroup<Enemy>();
+		add(enemies);
+
 		player = new Player();
 		add(player);
+
+		hud = new HUD();
+		add(hud);
+
+		combatHud = new CombatHUD();
+		add(combatHud);
 
 		map.loadEntities(placeEntities, "entities");
 
 		FlxG.camera.follow(player, TOPDOWN, 1);
 	}
 
-	function placeEntities(entity:EntityData) {
-		if (entity.name == "player")
+	function placeEntities(entity:EntityData)
+	{
+		var x = entity.x;
+		var y = entity.y;
+
+		switch (entity.name)
 		{
-			player.setPosition(entity.x, entity.y);
-		}
-		else if(entity.name == "coin")
-		{
-			coins.add(new Coin(entity.x + 4, entity.y + 4));
+			case "player":
+				player.setPosition(x, y);
+			case "coin":
+				coins.add(new Coin(x + 4, y + 4));
+			case "enemy":
+				enemies.add(new Enemy(x + 4, y, REGULAR));
+			case "boss":
+				enemies.add(new Enemy(x + 4, y, BOSS));
 		}
 	}
 
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		FlxG.overlap(player, coins, playerTouchCoin);
-		FlxG.collide(player, walls);
+
+		if (inCombat)
+		{
+			if (!combatHud.visible)
+			{
+				health = combatHud.playerHealth;
+				hud.updateHUD(health, money);
+				if (combatHud.outcome == VICTORY)
+				{
+					combatHud.enemy.kill();
+				}
+				else
+				{
+					combatHud.enemy.flicker();
+				}
+				inCombat = false;
+				player.active = true;
+				enemies.active = true;
+			}
+		}
+		else
+		{
+			FlxG.overlap(player, coins, playerTouchCoin);
+			FlxG.collide(player, walls);
+			FlxG.collide(enemies, walls);
+			enemies.forEachAlive(checkEnemyVision);
+			FlxG.overlap(player, enemies, playerTouchEnemy);
+		}
 	}
 
-	function playerTouchCoin(player:Player, coin:Coin) {
-		if(player.alive && player.exists && coin.alive && coin.exists) coin.kill();
+	function checkEnemyVision(enemy:Enemy)
+	{
+		if (walls.ray(enemy.getMidpoint(), player.getMidpoint()))
+		{
+			enemy.seesPlayer = true;
+			enemy.playerPostion = player.getMidpoint();
+		}
+		else
+		{
+			enemy.seesPlayer = false;
+		}
+	}
+
+	function playerTouchCoin(player:Player, coin:Coin)
+	{
+		if (player.alive && player.exists && coin.alive && coin.exists)
+		{
+			money++;
+			hud.updateHUD(health, money);
+			coin.kill();
+		}
+	}
+
+	function playerTouchEnemy(player:Player, enemy:Enemy)
+	{
+		if (player.alive && player.exists && enemy.alive && enemy.exists && !enemy.isFlickering())
+		{
+			startCombat(enemy);
+		}
+	}
+
+	function startCombat(enemy:Enemy)
+	{
+		inCombat = true;
+		player.active = false;
+		enemies.active = false;
+		combatHud.initCombat(health, enemy);
 	}
 }
