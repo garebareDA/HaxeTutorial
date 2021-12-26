@@ -33,10 +33,20 @@ class Player extends FlxSprite
 		var left:Bool = false;
 		var right:Bool = false;
 
+		#if FLX_KEYBOARD
 		up = FlxG.keys.anyPressed([UP, W]);
 		down = FlxG.keys.anyPressed([DOWN, S]);
 		left = FlxG.keys.anyPressed([LEFT, A]);
 		right = FlxG.keys.anyPressed([RIGHT, D]);
+		#end
+
+		#if mobile
+		var virtualPad = PlayState.virtualPad;
+		up = up || virtualPad.buttonUp.pressed;
+		down = down || virtualPad.buttonDown.pressed;
+		left = left || virtualPad.buttonLeft.pressed;
+		right = right || virtualPad.buttonRight.pressed;
+		#end
 
 		if (up && down)
 			up = down = false;

@@ -33,9 +33,18 @@ class PlayState extends FlxState
 
 	var coinSound:FlxSound;
 
+	#if mobile
+	public static var virtualPad:FlxVirtualPad;
+	#end
+
 	override public function create()
 	{
 		super.create();
+		#if mobile
+		virtualPad = new FlxVirtualPad(FULL, NONE);
+		add(virtualPad);
+		#end
+
 		coinSound = FlxG.sound.load(AssetPaths.coin__wav);
 
 		map = new FlxOgmo3Loader(AssetPaths.turnBasedRPG__ogmo, AssetPaths.room_01__json);
@@ -86,6 +95,9 @@ class PlayState extends FlxState
 	{
 		if (inCombat)
 		{
+			#if mobile
+			virtualPad.visible = true;
+			#end
 			if (!combatHud.visible)
 			{
 				health = combatHud.playerHealth;
@@ -166,6 +178,9 @@ class PlayState extends FlxState
 
 	function startCombat(enemy:Enemy)
 	{
+		#if mobile
+		virtualPad.visible = false;
+		#end
 		inCombat = true;
 		player.active = false;
 		enemies.active = false;

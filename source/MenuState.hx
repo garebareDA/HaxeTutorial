@@ -9,10 +9,19 @@ class MenuState extends FlxState
 {
 	var titleText:FlxText;
 	var optionsButton:FlxButton;
+	#if desktop
+	var exitButton:FlxButton;
+	#end
 
 	override public function create()
 	{
 		super.create();
+		#if desktop
+		exitButton = new FlxButton(FlxG.width - 28, 8, "X", clickExit);
+		exitButton.loadGraphic(AssetPaths.button__png, true, 20, 20);
+		add(exitButton);
+		#end
+
 		var playButton = new FlxButton(0, 0, "Play", clickPlay);
 		playButton.screenCenter();
 		add(playButton);
@@ -45,4 +54,11 @@ class MenuState extends FlxState
 	{
 		FlxG.switchState(new OptionsState());
 	}
+
+	#if desktop
+	function clickExit()
+	{
+		Sys.exit(0);
+	}
+	#end
 }
